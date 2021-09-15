@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>动态线程池管理</title>
+  <link rel="stylesheet" href="/layui/css/layui.css">
+</head>
+<body>
+<body style="padding: 20px;">
+<div class="layui-layout">
+    <table class="layui-hide" id="appTable" lay-filter="appTable"></table>
+</div>
+
+<script type="text/html" id="viewBar">
+  <a class="layui-btn layui-btn-xs" lay-event="view">查看</a>
+</script>
+
+<script src="/layui/layui.js"></script>
+<script>
+  layui.use('table', function(){
+    let table = layui.table;
+    const router = layui.router();
+    table.render({
+      elem: '#appTable'
+      ,url:'/manager/appInstanceList'
+      ,where: {appId: router.search.appId}
+      ,cellMinWidth: 80
+      ,cols: [
+        [
+          {field:'num', title: '序号',type:'numbers',align: 'center'}
+          ,{field:'id', title: 'ID',hide:true}
+          ,{field:'appName', title: '应用名',align: 'center'}
+          ,{field:'instanceIp', title: '机器ip',align: 'center'}
+          ,{field:'owner', title: '负责人',align: 'center'}
+          ,{field:'nacosDataId', title: 'dataId',align: 'center'}
+          ,{field:'nacosGroup', title: 'group',align: 'center'}
+          ,{field:'status', title: '状态', align: 'center'}
+          ,{field:'createTime', title: '创建时间', align: 'center'}
+          ,{fixed: 'right', title:'操作', toolbar: '#viewBar',align: 'center'}
+        ]
+      ],
+      page: true
+    });
+
+    //监听行工具事件
+    table.on('tool(appTable)', function(obj){
+      var data = obj.data;
+      if(obj.event === 'view'){
+        window.location.href="/threadPool/#/appInstanceId="+data.id;
+      }
+    });
+  });
+</script>
+</body>
+</html>

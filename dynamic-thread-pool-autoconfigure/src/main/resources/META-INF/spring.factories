@@ -1,0 +1,1 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.threadpool.autoconfigure.DynamicThreadPoolAutoconfigure,com.threadpool.db.autoconfigure.DynamicThreadPoolDbAutoconfigure

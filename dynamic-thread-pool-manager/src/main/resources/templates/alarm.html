@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>动态线程池管理</title>
+  <link rel="stylesheet" href="/layui/css/layui.css">
+</head>
+<body>
+<body style="padding: 20px;">
+<div class="layui-layout">
+    <div class="layui-form-item">
+      <div class="layui-inline">
+        <label class="layui-form-label">应用名</label>
+        <div class="layui-input-inline">
+          <input type="text" id="appName" lay-verify="required|number" autocomplete="off" class="layui-input">
+        </div>
+      </div>
+      <div class="layui-inline">
+        <label class="layui-form-label">线程池名称</label>
+        <div class="layui-input-inline">
+          <input type="text" id="threadPoolName" lay-verify="required|number" autocomplete="off" class="layui-input">
+        </div>
+      </div>
+      <div class="layui-inline">
+        <label class="layui-form-label">负责人</label>
+        <div class="layui-input-inline">
+          <input type="tel" id="owner" lay-verify="url" autocomplete="off" class="layui-input">
+        </div>
+      </div>
+      <div class="layui-inline">
+        <button type="button" class="layui-btn" id="search-bth">搜索</button>
+      </div>
+    </div>
+    <table class="layui-hide" id="appTable" lay-filter="appTable"></table>
+</div>
+<div class="layui-text" id="alarm-message" style="display:none;padding: 15px">
+</div>
+<script type="text/html" id="viewBar">
+  <a class="layui-btn layui-btn-xs" lay-event="view">查看告警详情</a>
+</script>
+
+<script src="/layui/layui.js"></script>
+<script>
+  layui.use(['table','jquery'], function(){
+    let table = layui.table;
+    let $ = layui.jquery;
+    var tableIns = table.render({
+      elem: '#appTable'
+      ,url:'/manager/queryAlarmRecordList'
+      ,cellMinWidth: 80
+      ,cols: [
+        [
+          {field:'num', title: '序号',type:'numbers',align: 'center'}
+          ,{field:'id', title: 'ID',hide:true}
+          ,{field:'appName', title: '应用名',align: 'center'}
+          ,{field:'threadPoolName', title: '线程池名称',align: 'center'}
+          ,{field:'owner', title: '负责人',align: 'center'}
+          ,{field:'instanceIp', title: '机器ip',align: 'center'}
+          ,{field:'alarmType', title: '告警类型',align: 'center'}
+          ,{field:'reason', title: '原因',align: 'center'}
+          ,{field:'createTime', title: '创建时间', align: 'center'}
+          ,{fixed: 'right', title:'操作', toolbar: '#viewBar',align: 'center'}
+        ]
+      ],
+      page: true
+    });
+
+    $("#search-bth").on("click",function () {
+      tableIns.reload({
+        page: {curr: 1},
+        where:{
+          appName:$("#appName").val(),
+          threadPoolName:$("#threadPoolName").val(),
+          owner:$("#owner").val()
+        }
+      });
+    });
+    //监听行工具事件
+    table.on('tool(appTable)', function(obj){
+      let data = obj.data;
+      $("#alarm-message").html(data.alarmMessage.replace(/\n/g,"<br>"));
+      if(obj.event === 'view'){
+        layer.open({
+          type:1,
+          area:['500px','590px'],
+          title: '告警信息详情',
+          content: $("#alarm-message"),
+          shadeClose: true});
+      }
+    });
+  });
+</script>
+</body>
+</html>

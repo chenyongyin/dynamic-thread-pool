@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.cyy.threadpool</groupId>
+  <artifactId>dynamic-thread-pool</artifactId>
+  <packaging>pom</packaging>
+  <version>1.0-SNAPSHOT</version>
+  
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.3.8.RELEASE</version>
+  </parent>
+  <modules>
+    <module>dynamic-thread-pool-autoconfigure</module>
+    <module>dynamic-thread-pool-starter</module>
+    <module>dynamic-thread-pool-manager</module>
+    <module>dynamic-thread-pool-db</module>
+      <module>dynamic-thread-pool-common</module>
+  </modules>
+  <scm>
+    <developerConnection>产品技术部</developerConnection>
+  </scm>
+
+  <properties>
+    <guava.version>30.1-jre</guava.version>
+    <druid-spring-boot-starter.version>1.2.4</druid-spring-boot-starter.version>
+    <mysql-connector.version>5.1.37</mysql-connector.version>
+    <spring-boot-starter-data-mongodb.version>2.4.3</spring-boot-starter-data-mongodb.version>
+    <mybatis-plus.version>3.4.2</mybatis-plus.version>
+    <common-utils.version>1.0-SNAPSHOT</common-utils.version>
+    <spring-boot-starter-data-mongodb.version>2.4.3</spring-boot-starter-data-mongodb.version>
+    <spring-swagger.version>1.0.1</spring-swagger.version>
+    <fastjson.version>1.2.46</fastjson.version>
+    <lombox.version>1.18.16</lombox.version>
+    <spring-boot.version>2.3.8.RELEASE</spring-boot.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.cyy.threadpool</groupId>
+        <artifactId>dynamic-thread-pool-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.cyy.threadpool</groupId>
+        <artifactId>dynamic-thread-pool-autoconfigure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.cyy.threadpool</groupId>
+        <artifactId>dynamic-thread-pool-db</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.cyy.threadpool</groupId>
+        <artifactId>dynamic-thread-pool-starter</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>${mysql-connector.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>druid-spring-boot-starter</artifactId>
+        <version>${druid-spring-boot-starter.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.baomidou</groupId>
+        <artifactId>mybatis-plus-boot-starter</artifactId>
+        <version>${mybatis-plus.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-data-mongodb</artifactId>
+        <version>${spring-boot-starter-data-mongodb.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.data</groupId>
+        <artifactId>spring-data-mongodb</artifactId>
+        <version>3.0.6.RELEASE</version>
+      </dependency>
+      <dependency>
+        <groupId>com.alibaba.nacos</groupId>
+        <artifactId>nacos-client</artifactId>
+        <version>1.4.1</version>
+      </dependency>
+      <!-- json -->
+      <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>fastjson</artifactId>
+        <version>${fastjson.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <scope>compile</scope>
+        <version>${lombox.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>rdc-snapshots</id>
+      <url>https://packages.aliyun.com/maven/repository/2069126-snapshot-ewVuMC/</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>rdc-releases</id>
+      <url>https://packages.aliyun.com/maven/repository/2069126-release-0CHwIA/</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>repository-central</id>
+      <name>public Repository</name>
+      <url>https://maven.aliyun.com/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>rdc-releases</id>
+      <name>Releases</name>
+      <url>https://packages.aliyun.com/maven/repository/2069126-release-0CHwIA/</url>
+    </repository>
+    <snapshotRepository>
+      <id>rdc-snapshots</id>
+      <name>Snapshot</name>
+      <url>https://packages.aliyun.com/maven/repository/2069126-snapshot-ewVuMC/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
+  <build>
+    <plugins>
+      <!--源码打包 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>3.1.0</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- 代码编译 -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+</project>

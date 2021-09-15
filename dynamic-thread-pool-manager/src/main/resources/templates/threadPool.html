@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>动态线程池管理</title>
+  <link rel="stylesheet" href="/layui/css/layui.css">
+  <style>
+    .layui-form-label-define{
+      float: left;
+      display: block;
+      padding: 12px 15px;
+      width: 130px;
+      font-weight: 400;
+      line-height: 20px;
+    }
+    .layui-form-item-define{
+      clear: both;
+    }
+  </style>
+</head>
+<body style="padding: 20px;">
+<div class="layui-layout">
+    <table class="layui-hide" id="treadPoolTable" lay-filter="treadPoolTable"></table>
+</div>
+<form class="layui-form" id="thread-pool-properties-form" lay-filter="thread-pool-properties-form" style="display:none">
+  <input name="appInstanceId" hidden>
+  <input name="id" hidden>
+  <div class="layui-form-item" style="width:90%;margin-top: 15px">
+    <label class="layui-form-label">线程池名称</label>
+    <div class="layui-input-block">
+      <input type="text" name="threadPoolName" disabled="disabled" style="background:#FCFCFC" class="layui-input layui-disabled" value="dynamic-thread-pool" id="threadPoolName">
+    </div>
+  </div>
+  <div class="layui-form-item" style="width:90%">
+    <label class="layui-form-label">核心数</label>
+    <div class="layui-input-block">
+      <input type="text" name="corePoolSize" class="layui-input" value="" id="corePoolSize">
+    </div>
+  </div>
+  <div class="layui-form-item" style="width:90%">
+    <label class="layui-form-label">最大值</label>
+    <div class="layui-input-block">
+      <input type="text" name="maximumPoolSize" required  lay-verify="required" placeholder="最大线程数" autocomplete="on" class="layui-input" id="maximumPoolSize">
+    </div>
+  </div>
+  <div class="layui-form-item" style="width:90%">
+    <label class="layui-form-label">队列</label>
+    <div class="layui-input-block">
+      <select name="queueType" id="queue-type-select" lay-filter="queue-type-select">
+        <option value="DynamicLinkedBlockingQueue">DynamicLinkedBlockingQueue</option>
+        <option value="LinkedBlockingQueue">LinkedBlockingQueue</option>
+        <option value="SynchronousQueue">SynchronousQueue</option>
+        <option value="ArrayBlockingQueue">ArrayBlockingQueue</option>
+        <option value="DelayQueue">DelayQueue</option>
+        <option value="LinkedTransferQueue">LinkedTransferQueue</option>
+        <option value="PriorityBlockingQueue">PriorityBlockingQueue</option>
+        <option value="LinkedBlockingDeque">LinkedBlockingDeque</option>
+      </select>
+    </div>
+  </div>
+  <div class="layui-form-item" style="width:90%">
+    <label class="layui-form-label">队列长度</label>
+    <div class="layui-input-block">
+      <input type="text" name="queueCapacity" required  lay-verify="required" placeholder="任务队列长度" autocomplete="on" class="layui-input" id="queueCapacity">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">是否告警</label>
+    <div class="layui-input-block">
+      <input type="checkbox" name="alarmEnable" lay-filter="alarm-switch" lay-skin="switch" lay-text="开启|关闭">
+    </div>
+  </div>
+  <div class="layui-form-item" style="width:90%">
+    <label class="layui-form-label">容量告警</label>
+    <div class="layui-input-block">
+      <input type="text" name="queueCapacityThreshold" required  lay-verify="required" placeholder="队列容量告警阈值" autocomplete="on" class="layui-input alarm" id="queueCapacityThreshold">
+    </div>
+  </div>
+  <div class="layui-form-item" style="width:90%">
+    <label class="layui-form-label">活跃度告警</label>
+    <div class="layui-input-block">
+      <input type="text" name="activeRateCapacityThreshold" required  lay-verify="required" placeholder="活跃度告警阈值" autocomplete="on" class="layui-input alarm" id="activeRateCapacityThreshold">
+    </div>
+  </div>
+  <div class="layui-form-item" style="text-align: center;margin-top: 20px;">
+    <div class="layui-input-block" style="margin-left: 0px;">
+      <button class="layui-btn" type="button" lay-submit lay-filter="submitBtn">保存并发布</button>
+      <button id="cancelBtn" type="button" class="layui-btn layui-btn-primary">取消</button>
+    </div>
+  </div>
+</form>
+
+
+<form class="layui-form" id="detail-form" lay-filter="thread-pool-properties-form" style="display:none">
+  <div class="layui-form-item-define" style="width:90%;margin-top: 15px">
+    <label class="layui-form-label-define" style="text-align: right">线程池名称:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="threadPoolName"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">负责人:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="owner"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">核心线程数:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="corePoolSize"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">活跃线程数:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="activeCount"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">活跃度:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="activeRate"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">最大线程数:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="maximumPoolSize"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">任务队列类型:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="queueType"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">任务队列容量:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="queueCapacity"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">当前队列大小:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="queueSize"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">队列历史峰值:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="largestPoolSize"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">完成任务数:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="completeTaskCount"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">任务拒绝类型:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="rejectedExecutionType"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">任务拒绝数:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="rejectCount"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">是否开启告警:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="alarmEnable"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">容量告警阈值:</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="queueCapacityThreshold"></label>
+    </div>
+  </div>
+  <div class="layui-form-item-define">
+    <label class="layui-form-label-define" style="text-align: right">活跃度告警阈值 :</label>
+    <div class="layui-input-block">
+      <label class="layui-form-label-define" name="activeRateCapacityThreshold"></label>
+    </div>
+  </div>
+</form>
+
+
+<script type="text/html" id="viewBar">
+  <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+  <a class="layui-btn layui-btn-xs" lay-event="detail">详情</a>
+</script>
+
+
+<script src="/layui/layui.js"></script>
+<script>
+  layui.use(['table','form','jquery'], function(){
+    const router = layui.router();
+    const table = layui.table;
+    let form = layui.form;
+    let $ = layui.jquery, layer = layui.layer;
+    let tableIns = table.render({
+      elem: '#treadPoolTable'
+      ,url:'/manager/threadPoolList'
+      ,where: {appInstanceId: router.search.appInstanceId}
+      ,cellMinWidth: 80
+      ,cols: [
+        [
+          {field:'num', title: '序号',type:'numbers',align: 'center'}
+          ,{field:'id', title: 'ID',hide:true}
+          ,{field:'threadPoolName', title: '线程池名称',minWidth:180,align: 'center'}
+          ,{field:'corePoolSize', title: '核心数',align: 'center'}
+          ,{field:'maximumPoolSize', title: '最大值',align: 'center'}
+          ,{field:'queueType', title: '队列类型', align: 'center'}
+          ,{field:'queueCapacity', title: '队列长度',align: 'center'}
+          ,{field:'rejectedExecutionType', title: '拒绝策略',align: 'center'}
+          ,{field:'alarmEnable', title: '是否开启告警',align: 'center'}
+          ,{field:'queueCapacityThreshold', title: '容量告警阈值', align: 'center'}
+          ,{field:'activeRateCapacityThreshold', title: '活跃度告警阈值' ,align: 'center'}
+          ,{field:'status', title: '状态',align: 'center'}
+          ,{field:'createTime', title: '创建时间',align: 'center'}
+          ,{field:'owner', title: '负责人',align: 'center'}
+          ,{fixed: 'right', title:'操作', toolbar: '#viewBar',align: 'center'}
+        ]
+      ],
+      page: true
+    });
+
+    function reloadTable(){
+      tableIns.reload({page: {curr: 1}});
+    }
+
+    //监听行工具事件
+    table.on('tool(treadPoolTable)', function(obj){
+      let data = obj.data;
+      console.log(data.threadPoolIndicatorInfo)
+      if(obj.event === 'detail'){
+        let threadPoolIndicatorInfo = JSON.parse(data.threadPoolIndicatorInfo);
+        $("label[name='threadPoolName']").html(threadPoolIndicatorInfo.threadPoolName);
+        $("label[name='activeCount']").html(threadPoolIndicatorInfo.activeCount);
+        $("label[name='activeRate']").html(threadPoolIndicatorInfo.activeRate);
+        $("label[name='activeRateCapacityThreshold']").html(threadPoolIndicatorInfo.activeRateCapacityThreshold);
+        $("label[name='completeTaskCount']").html(threadPoolIndicatorInfo.completeTaskCount);
+        $("label[name='corePoolSize']").html(threadPoolIndicatorInfo.corePoolSize);
+        $("label[name='largestPoolSize']").html(threadPoolIndicatorInfo.largestPoolSize);
+        $("label[name='maximumPoolSize']").html(threadPoolIndicatorInfo.maximumPoolSize);
+        $("label[name='owner']").html(threadPoolIndicatorInfo.owner);
+        $("label[name='queueCapacity']").html(threadPoolIndicatorInfo.queueCapacity);
+        $("label[name='queueCapacityThreshold']").html(threadPoolIndicatorInfo.queueCapacityThreshold);
+        $("label[name='queueSize']").html(threadPoolIndicatorInfo.queueSize);
+        $("label[name='rejectCount']").html(threadPoolIndicatorInfo.rejectCount);
+        $("label[name='rejectedExecutionType']").html(threadPoolIndicatorInfo.rejectedExecutionType);
+        $("label[name='alarmEnable']").html(threadPoolIndicatorInfo.alarmEnable ? "是":"否");
+        $("label[name='queueType']").html(threadPoolIndicatorInfo.queueType);
+        layer.open({
+          type:1,
+          area:['500px','550px'],
+          title: '详情',
+          content: $("#detail-form"),
+          shadeClose: true});
+      } else if(obj.event === 'edit'){
+        form.val('thread-pool-properties-form', {
+          "appInstanceId": data.appInstanceId,
+          "id": data.id,
+          "activeRateCapacityThreshold": data.activeRateCapacityThreshold,
+          "queueCapacityThreshold": data.queueCapacityThreshold,
+          "queueCapacity": data.queueCapacity,
+          "maximumPoolSize": data.maximumPoolSize,
+          "corePoolSize": data.corePoolSize,
+          "threadPoolName": data.threadPoolName,
+          "alarmEnable": data.alarmEnable,
+          "queueType": data.queueType
+        });
+        switchAlarmEnable(data.alarmEnable);
+        switchQueueType(data.queueType);
+        layer.open({
+          type:1,
+          area:['500px','550px'],
+          title: '修改线程池参数',
+          content: $("#thread-pool-properties-form"),
+          shadeClose: true});
+      }
+    });
+    form.on('submit(submitBtn)', function(data){
+      data.field.alarmEnable = data.field.alarmEnable === "on";
+      $.ajax({
+        type: "POST",
+        url: "/manager/updateDynamicThreadPoolInfo",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify(data.field),
+        success: function (resp) {
+          console.log("resp"+JSON.stringify(resp))
+           layer.closeAll();
+           reloadTable();
+        },
+        error: function (err) {
+
+        }
+      })
+    });
+
+    $("#cancelBtn").on("click",function () {
+      layer.closeAll();
+    });
+
+    form.on('select(queue-type-select)', function(data){
+      switchQueueType(data.value);
+    });
+    form.on('switch(alarm-switch)', function(obj){
+      switchAlarmEnable(obj.elem.checked);
+    });
+
+    function switchQueueType(queueType){
+      if(queueType === "DynamicLinkedBlockingQueue"){
+        $("#queueCapacity").removeClass("layui-disabled").css("background","").removeAttr("readonly");
+      }else{
+        $("#queueCapacity").addClass("layui-disabled").css("background","#FCFCFC").attr("readonly","true");
+      }
+    }
+
+    function switchAlarmEnable(status){
+      if(status){
+        $(".alarm").removeClass("layui-disabled").css("background","").removeAttr("readonly");
+      }else{
+        $(".alarm").addClass("layui-disabled").css("background","#FCFCFC").attr("readonly","true");
+      }
+    }
+
+  });
+</script>
+</body>
+</html>
