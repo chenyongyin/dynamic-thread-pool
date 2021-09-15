@@ -117,47 +117,6 @@
     </dependencies>
   </dependencyManagement>
 
-  <repositories>
-    <repository>
-      <id>rdc-snapshots</id>
-      <url>https://packages.aliyun.com/maven/repository/2069126-snapshot-ewVuMC/</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>rdc-releases</id>
-      <url>https://packages.aliyun.com/maven/repository/2069126-release-0CHwIA/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>repository-central</id>
-      <name>public Repository</name>
-      <url>https://maven.aliyun.com/nexus/content/groups/public</url>
-    </repository>
-  </repositories>
-
-  <distributionManagement>
-    <repository>
-      <id>rdc-releases</id>
-      <name>Releases</name>
-      <url>https://packages.aliyun.com/maven/repository/2069126-release-0CHwIA/</url>
-    </repository>
-    <snapshotRepository>
-      <id>rdc-snapshots</id>
-      <name>Snapshot</name>
-      <url>https://packages.aliyun.com/maven/repository/2069126-snapshot-ewVuMC/</url>
-    </snapshotRepository>
-  </distributionManagement>
-
   <build>
     <plugins>
       <!--源码打包 -->
